@@ -6,6 +6,7 @@ class CreateMemeBloc {
   // данные логического объекта, которые получаем в UI
   // отображение текста в верхней части приложения
   final memeTextSubject = BehaviorSubject<List<MemeText>>.seeded(<MemeText>[]);
+
   // выделенный в данный момент memeText
   final selectedMemeTextSubject = BehaviorSubject<MemeText?>.seeded(null);
 
@@ -15,9 +16,9 @@ class CreateMemeBloc {
     memeTextSubject.add([...memeTextSubject.value, newMemeText]);
     selectedMemeTextSubject.add(newMemeText);
   }
+
 // получить список с текущими memeText и найти нужный и заменить его id
   void changeMemeText(final String id, final String text) {
-
     final copiedList = [...memeTextSubject.value];
     final index = copiedList.indexWhere((memeText) => memeText.id == id);
     if (index == -1) {
@@ -46,9 +47,53 @@ class CreateMemeBloc {
   Stream<MemeText?> observeSelectedMemeText() =>
       selectedMemeTextSubject.distinct();
 
+  // Stream возвращающий MemeTextWithSelection
+  Stream<List<MemeTextsWithSelection>> observeMemeTextsWithSelection() {
+    return Rx.combineLatest2<List<MemeText>, MemeText?,
+        List<MemeTextsWithSelection>>(
+      observeMemeTexts(),
+      observeSelectedMemeText(),
+      (memeTexts, selectedMemeText) {
+        return memeTexts.map((memeText) {
+          return MemeTextsWithSelection(
+            memetext: memeText,
+            selected: memeText.id == selectedMemeText?.id,
+          );
+        }).toList();
+      },
+    );
+  }
+
   void dispose() {
     memeTextSubject.close();
     selectedMemeTextSubject.close();
+  }
+}
+
+// информация нетолько о выделенном тексте но и выделен ли он
+class MemeTextsWithSelection {
+  final MemeText memetext;
+  final bool selected;
+
+  MemeTextsWithSelection({
+    required this.memetext,
+    required this.selected,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MemeTextsWithSelection &&
+          runtimeType == other.runtimeType &&
+          memetext == other.memetext &&
+          selected == other.selected;
+
+  @override
+  int get hashCode => memetext.hashCode ^ selected.hashCode;
+
+  @override
+  String toString() {
+    return 'MemeTextWithSelection{memetext: $memetext, selected: $selected}';
   }
 }
 
