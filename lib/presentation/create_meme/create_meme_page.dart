@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:memogenerator/blocs/create_meme_bloc.dart';
-import 'package:memogenerator/blocs/main_bloc.dart';
+import 'package:memogenerator/presentation/create_meme/create_meme_bloc.dart';
+import 'package:memogenerator/presentation/create_meme/model/meme_text.dart';
+import 'package:memogenerator/presentation/create_meme/model/meme_text_with_selection.dart';
+import 'package:memogenerator/presentation/main/main_bloc.dart';
 import 'package:memogenerator/resources/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
@@ -225,7 +227,7 @@ class BottomMemeText extends StatelessWidget {
       color: item.selected ? AppColors.darkGrey16 : null,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Text(
-        item.memetext.text,
+        item.memeText.text,
         style: TextStyle(
           color: AppColors.darkGrey,
           fontSize: 16,

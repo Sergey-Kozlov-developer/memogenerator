@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:memogenerator/blocs/main_bloc.dart';
-import 'package:memogenerator/pages/create_meme_page.dart';
+import 'package:memogenerator/presentation/main/main_bloc.dart';
+import 'package:memogenerator/presentation/create_meme/create_meme_page.dart';
 import 'package:memogenerator/resources/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;

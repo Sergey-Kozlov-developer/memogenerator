@@ -1,3 +1,5 @@
+import 'package:memogenerator/presentation/create_meme/model/meme_text.dart';
+import 'package:memogenerator/presentation/create_meme/model/meme_text_with_selection.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:collection/collection.dart';
@@ -56,7 +58,7 @@ class CreateMemeBloc {
       (memeTexts, selectedMemeText) {
         return memeTexts.map((memeText) {
           return MemeTextsWithSelection(
-            memetext: memeText,
+            memeText: memeText,
             selected: memeText.id == selectedMemeText?.id,
           );
         }).toList();
@@ -70,57 +72,5 @@ class CreateMemeBloc {
   }
 }
 
-// информация нетолько о выделенном тексте но и выделен ли он
-class MemeTextsWithSelection {
-  final MemeText memetext;
-  final bool selected;
 
-  MemeTextsWithSelection({
-    required this.memetext,
-    required this.selected,
-  });
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is MemeTextsWithSelection &&
-          runtimeType == other.runtimeType &&
-          memetext == other.memetext &&
-          selected == other.selected;
-
-  @override
-  int get hashCode => memetext.hashCode ^ selected.hashCode;
-
-  @override
-  String toString() {
-    return 'MemeTextWithSelection{memetext: $memetext, selected: $selected}';
-  }
-}
-
-// создание уникального индефикатора содержащего текст нашей надписи
-class MemeText {
-  final String id;
-  final String text;
-
-  MemeText({required this.id, required this.text});
-
-  factory MemeText.create() {
-    return MemeText(id: Uuid().v4(), text: "");
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is MemeText &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          text == other.text;
-
-  @override
-  int get hashCode => id.hashCode ^ text.hashCode;
-
-  @override
-  String toString() {
-    return 'MemeText{id: $id, text: $text}';
-  }
-}
