@@ -24,6 +24,7 @@ dependencies:
   uuid: ^3.0.6
   json_annotation: ^4.5.0
   equatable: ^2.0.3
+  shared_preferences: ^2.0.15
 
 
 dev_dependencies:
