@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:ui';
+
+import 'package:memogenerator/presentation/create_meme/model/meme_text_offset.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_with_selection.dart';
 import 'package:rxdart/rxdart.dart';
@@ -11,6 +15,51 @@ class CreateMemeBloc {
 
   // выделенный в данный момент memeText
   final selectedMemeTextSubject = BehaviorSubject<MemeText?>.seeded(null);
+
+  final memeTextOffsetsSubject =
+      BehaviorSubject<List<MemeTextOffset>>.seeded(<MemeTextOffset>[]);
+
+  // создание асихронного метода changeMemeTextOffset
+  final newMemeTextOffsetSubject =
+      BehaviorSubject<MemeTextOffset?>.seeded(null);
+
+  StreamSubscription<MemeTextOffset?>? newMemeTextOffsetSubscription;
+
+  // конструктор слушатель
+  // добавляем debounceTime для сохранения положения после того как мы
+  // перестали передвигать текст
+  CreateMemeBloc() {
+    _subscribeToNewMemTextOffset();
+  }
+
+  void _subscribeToNewMemTextOffset() {
+    newMemeTextOffsetSubscription = newMemeTextOffsetSubject
+        .debounceTime(Duration(milliseconds: 300))
+        .listen((newMemeTextOffset) {
+      if (newMemeTextOffset != null) {
+        _changeMemeTextOffsetInternal(newMemeTextOffset);
+      }
+    },
+            onError: (error, stackTrace) => print(
+                "Error in newMemeTextOffsetSubscription: $error, $stackTrace"));
+  }
+
+  void changeMemeTextOffset(final String id, final Offset offset) {
+    newMemeTextOffsetSubject.add(MemeTextOffset(id: id, offset: offset));
+  }
+
+  // добавляем мем и сетим его в offset
+  void _changeMemeTextOffsetInternal(final MemeTextOffset newMemeTextOffset) {
+    final copiedMemeTextOffset = [...memeTextOffsetsSubject.value];
+    final currentMemeTextOffset = copiedMemeTextOffset.firstWhereOrNull(
+        (memeTextOffset) => memeTextOffset.id == newMemeTextOffset.id);
+    if (currentMemeTextOffset != null) {
+      copiedMemeTextOffset.remove(currentMemeTextOffset);
+    }
+    // добовляем новый элемент
+    copiedMemeTextOffset.add(newMemeTextOffset);
+    memeTextOffsetsSubject.add(copiedMemeTextOffset);
+  }
 
   // при нажатии добавить текст, будет создаваться текст на холсте
   void addNewText() {
@@ -69,8 +118,8 @@ class CreateMemeBloc {
   void dispose() {
     memeTextSubject.close();
     selectedMemeTextSubject.close();
+    memeTextOffsetsSubject.close();
+    newMemeTextOffsetSubject.close();
+    newMemeTextOffsetSubscription?.cancel();
   }
 }
-
-
-
