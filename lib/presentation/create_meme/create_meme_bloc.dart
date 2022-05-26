@@ -29,14 +29,39 @@ class CreateMemeBloc {
 
   StreamSubscription<MemeTextOffset?>? newMemeTextOffsetSubscription;
   StreamSubscription<bool>? saveMemeSubscription;
+  StreamSubscription<Meme?>? existenMemeSubscription;
 
   // конструктор слушатель
   // добавляем debounceTime для сохранения положения после того как мы
   // перестали передвигать текст
-  final String id = Uuid().v4();
+  final String id;
 
-  CreateMemeBloc() {
+  CreateMemeBloc({final String? id}) : this.id = id ?? Uuid().v4() {
     _subscribeToNewMemTextOffset();
+    existenMemeSubscription =
+        MemesRepository.getInstance().getMeme(this.id).asStream().listen(
+      (meme) {
+        if (meme == null) {
+          return;
+        }
+        final memeTexts = meme.texts.map((textWithPosition) {
+          return MemeText(id: textWithPosition.id, text: textWithPosition.text);
+        }).toList();
+        final memeTextOffset = meme.texts.map((textWithPosition) {
+          return MemeTextOffset(
+            id: textWithPosition.id,
+            offset: Offset(
+              textWithPosition.position.left,
+              textWithPosition.position.top,
+            ),
+          );
+        }).toList();
+        memeTextSubject.add(memeTexts);
+        memeTextOffsetsSubject.add(memeTextOffset);
+      },
+      onError: (error, stackTrace) =>
+          print("Error in existenMemeSubscription: $error, $stackTrace"),
+    );
   }
 
   // сохранеие текста позиции в shared_pref
@@ -62,7 +87,7 @@ class CreateMemeBloc {
         print("Meme saved: $saved");
       },
       onError: (error, stackTrace) =>
-          print("Error in newMemeTextOffsetSubscription: $error, $stackTrace"),
+          print("Error in saveMemeSubscription: $error, $stackTrace"),
     );
   }
 
@@ -158,5 +183,6 @@ class CreateMemeBloc {
     newMemeTextOffsetSubject.close();
     newMemeTextOffsetSubscription?.cancel();
     saveMemeSubscription?.cancel();
+    existenMemeSubscription?.cancel();
   }
 }

@@ -11,8 +11,9 @@ class Position extends Equatable {
   final double left;
 
   Position({
-    required this.top,
     required this.left,
+    required this.top,
+
   });
 
 

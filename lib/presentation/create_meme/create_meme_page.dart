@@ -11,9 +11,11 @@ import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 
 class CreateMemePage extends StatefulWidget {
-  final http.Client? client;
 
-  CreateMemePage({Key? key, this.client}) : super(key: key);
+  final String? id;
+
+  const CreateMemePage({Key? key, this.id}) : super(key: key);
+
 
   @override
   State<CreateMemePage> createState() => _CreateMemePageState();
@@ -25,7 +27,7 @@ class _CreateMemePageState extends State<CreateMemePage> {
   @override
   void initState() {
     super.initState();
-    bloc = CreateMemeBloc();
+    bloc = CreateMemeBloc(id: widget.id);
   }
 
   @override
