@@ -7,6 +7,7 @@ import 'package:memogenerator/data/model/text_with_position.dart';
 import 'package:memogenerator/data/repositories/memes_repository.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_offset.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text.dart';
+import 'package:memogenerator/presentation/create_meme/model/meme_text_with_offset.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_with_selection.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
@@ -38,6 +39,10 @@ class CreateMemeBloc {
 
   CreateMemeBloc({final String? id}) : this.id = id ?? Uuid().v4() {
     _subscribeToNewMemTextOffset();
+    _subscribeToExistentMeme();
+  }
+
+  void _subscribeToExistentMeme() {
     existenMemeSubscription =
         MemesRepository.getInstance().getMeme(this.id).asStream().listen(
       (meme) {
@@ -155,6 +160,24 @@ class CreateMemeBloc {
   // выдает инфу содерж в этом subject
   Stream<List<MemeText>> observeMemeTexts() => memeTextSubject
       .distinct((prev, next) => ListEquality().equals(prev, next));
+
+  Stream<List<MemeTextsWithOffset>> observeMemeTextWithOffsets() {
+    return Rx.combineLatest2<List<MemeText>, List<MemeTextOffset>,
+            List<MemeTextsWithOffset>>(
+        observeMemeTexts(), memeTextOffsetsSubject.distinct(),
+        (memeTexts, memeTextOffsets) {
+      return memeTexts.map((memeText) {
+        final memeTextOffset = memeTextOffsets.firstWhereOrNull((element) {
+          return element.id == memeText.id;
+        });
+        return MemeTextsWithOffset(
+          id: memeText.id,
+          text: memeText.text,
+          offset: memeTextOffset?.offset,
+        );
+      }).toList();
+    }).distinct((prev, next) => ListEquality().equals(prev, next));
+  }
 
   Stream<MemeText?> observeSelectedMemeText() =>
       selectedMemeTextSubject.distinct();
