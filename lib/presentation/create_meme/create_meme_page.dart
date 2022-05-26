@@ -39,6 +39,18 @@ class _CreateMemePageState extends State<CreateMemePage> {
           foregroundColor: AppColors.darkGrey,
           title: Text("Создаем мем"),
           bottom: EditTextBar(),
+          actions: [
+            GestureDetector(
+              onTap: () => bloc.saveMeme(),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Icon(
+                  Icons.save,
+                  color: AppColors.darkGrey,
+                ),
+              ),
+            )
+          ],
         ),
         backgroundColor: Colors.white,
         body: SafeArea(
@@ -304,8 +316,8 @@ class _DraggableMemeTextState extends State<DraggableMemeText> {
 
   @override
   void initState() {
-    top = widget.parentConstraints.maxHeight /2;
-    left = widget.parentConstraints.maxWidth /3;
+    top = widget.parentConstraints.maxHeight / 2;
+    left = widget.parentConstraints.maxWidth / 3;
     super.initState();
   }
 

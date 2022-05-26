@@ -1,6 +1,10 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:memogenerator/data/model/meme.dart';
+import 'package:memogenerator/data/model/position.dart';
+import 'package:memogenerator/data/model/text_with_position.dart';
+import 'package:memogenerator/data/repositories/memes_repository.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_offset.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_with_selection.dart';
@@ -24,24 +28,56 @@ class CreateMemeBloc {
       BehaviorSubject<MemeTextOffset?>.seeded(null);
 
   StreamSubscription<MemeTextOffset?>? newMemeTextOffsetSubscription;
+  StreamSubscription<bool>? saveMemeSubscription;
 
   // конструктор слушатель
   // добавляем debounceTime для сохранения положения после того как мы
   // перестали передвигать текст
+  final String id = Uuid().v4();
+
   CreateMemeBloc() {
     _subscribeToNewMemTextOffset();
+  }
+
+  // сохранеие текста позиции в shared_pref
+  void saveMeme() {
+    final memeTexts = memeTextSubject.value;
+    final memTextsOffsets = memeTextOffsetsSubject.value;
+    final textsWithPositions = memeTexts.map((memeText) {
+      final memeTextPosition =
+          memTextsOffsets.firstWhereOrNull((memTextsOffset) {
+        return memTextsOffset.id == memeText.id;
+      });
+      final position = Position(
+        top: memeTextPosition?.offset.dy ?? 0,
+        left: memeTextPosition?.offset.dx ?? 0,
+      );
+      return TextWithPosition(
+          id: memeText.id, text: memeText.text, position: position);
+    }).toList();
+    final meme = Meme(id: id, texts: textsWithPositions);
+    saveMemeSubscription =
+        MemesRepository.getInstance().addToMemes(meme).asStream().listen(
+      (saved) {
+        print("Meme saved: $saved");
+      },
+      onError: (error, stackTrace) =>
+          print("Error in newMemeTextOffsetSubscription: $error, $stackTrace"),
+    );
   }
 
   void _subscribeToNewMemTextOffset() {
     newMemeTextOffsetSubscription = newMemeTextOffsetSubject
         .debounceTime(Duration(milliseconds: 300))
-        .listen((newMemeTextOffset) {
-      if (newMemeTextOffset != null) {
-        _changeMemeTextOffsetInternal(newMemeTextOffset);
-      }
-    },
-            onError: (error, stackTrace) => print(
-                "Error in newMemeTextOffsetSubscription: $error, $stackTrace"));
+        .listen(
+      (newMemeTextOffset) {
+        if (newMemeTextOffset != null) {
+          _changeMemeTextOffsetInternal(newMemeTextOffset);
+        }
+      },
+      onError: (error, stackTrace) =>
+          print("Error in newMemeTextOffsetSubscription: $error, $stackTrace"),
+    );
   }
 
   void changeMemeTextOffset(final String id, final Offset offset) {
@@ -121,5 +157,6 @@ class CreateMemeBloc {
     memeTextOffsetsSubject.close();
     newMemeTextOffsetSubject.close();
     newMemeTextOffsetSubscription?.cancel();
+    saveMemeSubscription?.cancel();
   }
 }
