@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:memogenerator/data/model/meme.dart';
@@ -9,6 +10,7 @@ import 'package:memogenerator/presentation/create_meme/model/meme_text_offset.da
 import 'package:memogenerator/presentation/create_meme/model/meme_text.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_with_offset.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_with_selection.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:collection/collection.dart';
@@ -27,6 +29,8 @@ class CreateMemeBloc {
   // создание асихронного метода changeMemeTextOffset
   final newMemeTextOffsetSubject =
       BehaviorSubject<MemeTextOffset?>.seeded(null);
+  // memePathSubject сохранеие и хранеие пути нашего файла
+  final memePathSubject = BehaviorSubject<String?>.seeded(null);
 
   StreamSubscription<MemeTextOffset?>? newMemeTextOffsetSubscription;
   StreamSubscription<bool>? saveMemeSubscription;
@@ -37,7 +41,11 @@ class CreateMemeBloc {
   // перестали передвигать текст
   final String id;
 
-  CreateMemeBloc({final String? id}) : this.id = id ?? Uuid().v4() {
+  CreateMemeBloc({
+    final String? id,
+    final String? selectedMemePath,
+  }) : this.id = id ?? Uuid().v4() {
+    memePathSubject.add(selectedMemePath);
     _subscribeToNewMemTextOffset();
     _subscribeToExistentMeme();
   }
@@ -63,6 +71,7 @@ class CreateMemeBloc {
         }).toList();
         memeTextSubject.add(memeTexts);
         memeTextOffsetsSubject.add(memeTextOffset);
+        memePathSubject.add(meme.memePath);
       },
       onError: (error, stackTrace) =>
           print("Error in existenMemeSubscription: $error, $stackTrace"),
@@ -85,15 +94,45 @@ class CreateMemeBloc {
       return TextWithPosition(
           id: memeText.id, text: memeText.text, position: position);
     }).toList();
-    final meme = Meme(id: id, texts: textsWithPositions);
+
     saveMemeSubscription =
-        MemesRepository.getInstance().addToMemes(meme).asStream().listen(
+        _saveMemeInternal(textsWithPositions).asStream().listen(
       (saved) {
         print("Meme saved: $saved");
       },
       onError: (error, stackTrace) =>
           print("Error in saveMemeSubscription: $error, $stackTrace"),
     );
+  }
+
+  Future<bool> _saveMemeInternal(
+    final List<TextWithPosition> textWithPosition,
+  ) async {
+    // imagePath сохранение картинки
+    final imagePath = memePathSubject.value;
+    if (imagePath == null) {
+      final meme = Meme(id: id, texts: textWithPosition);
+      return await MemesRepository.getInstance().addToMemes(meme);
+    }
+    // docsPath получение доступа где хранятся картинки
+    final docsPath = await getApplicationDocumentsDirectory();
+    // папка с мемами создаем
+    final memePath = "${docsPath.absolute.path}${Platform.pathSeparator}memes";
+    await Directory(memePath).create(recursive: true);
+    // imageName получение названия файлика
+    final imageName = imagePath.split(Platform.pathSeparator).last;
+    // fullImagePath новый путь
+    final newImagePath = "$memePath${Platform.pathSeparator}$imageName";
+    final tempFile = File(imagePath);
+    // скопировали в новую папку
+    await tempFile.copy(newImagePath);
+
+    final meme = Meme(
+      id: id,
+      texts: textWithPosition,
+      memePath: newImagePath,
+    );
+    return await MemesRepository.getInstance().addToMemes(meme);
   }
 
   void _subscribeToNewMemTextOffset() {
@@ -161,6 +200,8 @@ class CreateMemeBloc {
   Stream<List<MemeText>> observeMemeTexts() => memeTextSubject
       .distinct((prev, next) => ListEquality().equals(prev, next));
 
+  Stream<String?> observeMemePath() => memePathSubject.distinct();
+
   Stream<List<MemeTextsWithOffset>> observeMemeTextWithOffsets() {
     return Rx.combineLatest2<List<MemeText>, List<MemeTextOffset>,
             List<MemeTextsWithOffset>>(
@@ -204,6 +245,8 @@ class CreateMemeBloc {
     selectedMemeTextSubject.close();
     memeTextOffsetsSubject.close();
     newMemeTextOffsetSubject.close();
+    memePathSubject.close();
+
     newMemeTextOffsetSubscription?.cancel();
     saveMemeSubscription?.cancel();
     existenMemeSubscription?.cancel();
