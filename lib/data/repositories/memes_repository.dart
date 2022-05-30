@@ -6,35 +6,41 @@ import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:collection/collection.dart';
 
-
 class MemesRepository {
-
   final updater = PublishSubject<Null>();
   final SharedPreferenceData spData;
 
   static MemesRepository? _instance;
   // если не создан объект, то создаем и присваиваем
-  factory MemesRepository.getInstance() =>
-      _instance ??= MemesRepository._internal(SharedPreferenceData.getInstance());
+  factory MemesRepository.getInstance() => _instance ??=
+      MemesRepository._internal(SharedPreferenceData.getInstance());
 
   MemesRepository._internal(this.spData);
 
-
   // метод добавления в главный экран
-  Future<bool> addToMemes(final Meme meme) async {
+  Future<bool> addToMemes(final Meme newMeme) async {
     // получаем сырой список memes, листы со стрингами
-    final rawMemes = await spData.getMemes();
-    // сохраняем нового героя
-    rawMemes.add(json.encode(meme.toJson()));
-    // // прокидываем событие об изменении хранилища
-    return _setRawMemes(rawMemes);
+    final memes = await getMemes();
+    // получение доступа к id существующего мема и сравниваем с новым
+    final memeIndex = memes.indexWhere((meme) => meme.id == newMeme.id);
+    // если нет мема, то добавляем его
+    if (memeIndex == -1) {
+      // возвращаем старые мемы и новые
+      memes.add(newMeme);
+    } else {
+      memes.removeAt(memeIndex);
+      memes.insert(memeIndex, newMeme);
+    }
+
+    // возвращаем все мемы
+    return _setMemes(memes);
   }
 
   // удаление по id
   Future<bool> removeFromMemes(final String id) async {
     // получаем мем по id, сырой список превратили в стринг
     final memes = await getMemes();
-    // сохраняем новый мем
+    // удаляем новый мем
     memes.removeWhere((meme) => meme.id == id);
     // сохраняем
     return _setMemes(memes);
@@ -53,7 +59,6 @@ class MemesRepository {
     }
   }
 
-
   Future<List<Meme>> getMemes() async {
     // получаем сырой список мемов, листы со стрингами
     final rawMemes = await spData.getMemes();
@@ -62,8 +67,6 @@ class MemesRepository {
         .map((rawMeme) => Meme.fromJson(json.decode(rawMeme)))
         .toList();
   }
-
-
 
   // сохранение списка избранного в локальном хранилище
   // и его отображение на экране
@@ -74,9 +77,7 @@ class MemesRepository {
   }
 
   Future<bool> _setMemes(final List<Meme> memes) async {
-    final rawMemes = memes
-        .map((meme) => json.encode(meme.toJson()))
-        .toList();
+    final rawMemes = memes.map((meme) => json.encode(meme.toJson())).toList();
     // сохраняем
     return _setRawMemes(rawMemes);
   }
@@ -85,10 +86,4 @@ class MemesRepository {
     updater.add(null);
     return spData.setMemes(rawMemes);
   }
-
-
-
-
-
-
 }
