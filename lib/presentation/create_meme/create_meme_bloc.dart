@@ -6,6 +6,7 @@ import 'package:memogenerator/data/model/meme.dart';
 import 'package:memogenerator/data/model/position.dart';
 import 'package:memogenerator/data/model/text_with_position.dart';
 import 'package:memogenerator/data/repositories/memes_repository.dart';
+import 'package:memogenerator/domain/interactors/save_meme_interactor.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_offset.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_with_offset.dart';
@@ -95,44 +96,20 @@ class CreateMemeBloc {
           id: memeText.id, text: memeText.text, position: position);
     }).toList();
 
-    saveMemeSubscription =
-        _saveMemeInternal(textsWithPositions).asStream().listen(
+    saveMemeSubscription = SaveMemeInteractor.getInsstance()
+        .saveMeme(
+          id: id,
+          textWithPositions: textsWithPositions,
+          imagePath: memePathSubject.value,
+        )
+        .asStream()
+        .listen(
       (saved) {
         print("Meme saved: $saved");
       },
       onError: (error, stackTrace) =>
           print("Error in saveMemeSubscription: $error, $stackTrace"),
     );
-  }
-
-  Future<bool> _saveMemeInternal(
-    final List<TextWithPosition> textWithPosition,
-  ) async {
-    // imagePath сохранение картинки
-    final imagePath = memePathSubject.value;
-    if (imagePath == null) {
-      final meme = Meme(id: id, texts: textWithPosition);
-      return await MemesRepository.getInstance().addToMemes(meme);
-    }
-    // docsPath получение доступа где хранятся картинки
-    final docsPath = await getApplicationDocumentsDirectory();
-    // папка с мемами создаем
-    final memePath = "${docsPath.absolute.path}${Platform.pathSeparator}memes";
-    await Directory(memePath).create(recursive: true);
-    // imageName получение названия файлика
-    final imageName = imagePath.split(Platform.pathSeparator).last;
-    // fullImagePath новый путь
-    final newImagePath = "$memePath${Platform.pathSeparator}$imageName";
-    final tempFile = File(imagePath);
-    // скопировали в новую папку
-    await tempFile.copy(newImagePath);
-
-    final meme = Meme(
-      id: id,
-      texts: textWithPosition,
-      memePath: newImagePath,
-    );
-    return await MemesRepository.getInstance().addToMemes(meme);
   }
 
   void _subscribeToNewMemTextOffset() {
