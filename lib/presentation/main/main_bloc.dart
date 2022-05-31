@@ -1,5 +1,5 @@
 import 'package:image_picker/image_picker.dart';
-import 'package:memogenerator/data/model/meme.dart';
+import 'package:memogenerator/data/models/meme.dart';
 import 'package:memogenerator/data/repositories/memes_repository.dart';
 
 class MainBloc {

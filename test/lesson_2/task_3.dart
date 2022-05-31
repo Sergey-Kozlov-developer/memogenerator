@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:memogenerator/data/model/meme.dart';
+import 'package:memogenerator/data/models/meme.dart';
 import 'package:memogenerator/data/repositories/memes_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';

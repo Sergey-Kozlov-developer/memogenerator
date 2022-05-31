@@ -1,14 +1,11 @@
-
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:memogenerator/data/model/position.dart';
-
+import 'package:memogenerator/data/models/position.dart';
 
 part 'text_with_position.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class TextWithPosition extends Equatable {
-
   final String id;
   final String text;
   final Position position;
@@ -19,7 +16,8 @@ class TextWithPosition extends Equatable {
     required this.position,
   });
 
-  factory TextWithPosition.fromJson(final Map<String, dynamic> json) => _$TextWithPositionFromJson(json);
+  factory TextWithPosition.fromJson(final Map<String, dynamic> json) =>
+      _$TextWithPositionFromJson(json);
 
   Map<String, dynamic> toJson() => _$TextWithPositionToJson(this);
 

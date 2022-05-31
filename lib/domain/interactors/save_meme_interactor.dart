@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:memogenerator/data/model/meme.dart';
-import 'package:memogenerator/data/model/text_with_position.dart';
+import 'package:memogenerator/data/models/meme.dart';
+import 'package:memogenerator/data/models/text_with_position.dart';
 import 'package:memogenerator/data/repositories/memes_repository.dart';
 import 'package:path_provider/path_provider.dart';
 

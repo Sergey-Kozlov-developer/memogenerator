@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:memogenerator/data/model/meme.dart';
+import 'package:memogenerator/data/models/meme.dart';
 import 'package:memogenerator/data/shared_preference_data.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';

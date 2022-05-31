@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:memogenerator/data/model/meme.dart';
-import 'package:memogenerator/data/model/position.dart';
-import 'package:memogenerator/data/model/text_with_position.dart';
+import 'package:memogenerator/data/models/meme.dart';
+import 'package:memogenerator/data/models/position.dart';
+import 'package:memogenerator/data/models/text_with_position.dart';
 import 'package:memogenerator/data/repositories/memes_repository.dart';
 import 'package:memogenerator/domain/interactors/save_meme_interactor.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_offset.dart';
