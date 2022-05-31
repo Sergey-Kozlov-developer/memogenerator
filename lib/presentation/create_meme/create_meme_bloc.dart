@@ -96,7 +96,7 @@ class CreateMemeBloc {
           id: memeText.id, text: memeText.text, position: position);
     }).toList();
 
-    saveMemeSubscription = SaveMemeInteractor.getInsstance()
+    saveMemeSubscription = SaveMemeInteractor.getInstance()
         .saveMeme(
           id: id,
           textWithPositions: textsWithPositions,

@@ -8,7 +8,7 @@ import 'package:path_provider/path_provider.dart';
 class SaveMemeInteractor {
   static SaveMemeInteractor? _instance;
 
-  factory SaveMemeInteractor.getInsstance() =>
+  factory SaveMemeInteractor.getInstance() =>
       _instance ??= SaveMemeInteractor._internal();
 
   SaveMemeInteractor._internal();
@@ -25,7 +25,7 @@ class SaveMemeInteractor {
     }
     // docsPath получение доступа где хранятся картинки
     final docsPath = await getApplicationDocumentsDirectory();
-    // папка с мемами создаем
+    // папка с мемами создаем ее
     final memePath = "${docsPath.absolute.path}${Platform.pathSeparator}memes";
     await Directory(memePath).create(recursive: true);
     // imageName получение названия файлика

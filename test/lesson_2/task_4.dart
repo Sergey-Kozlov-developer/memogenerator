@@ -73,7 +73,7 @@ void runTestLesson2Task4() {
         memePath: "$docsMemesPath$ps$firstImageName",
       );
 
-      final saveMemeInteractor = SaveMemeInteractor.getInsstance();
+      final saveMemeInteractor = SaveMemeInteractor.getInstance();
       final memeRepository = MemesRepository.getInstance();
 
       print("Сохраняем мем через SaveMemeInteractor");
