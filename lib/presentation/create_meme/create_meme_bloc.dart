@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:memogenerator/data/models/meme.dart';
 import 'package:memogenerator/data/models/position.dart';
 import 'package:memogenerator/data/models/text_with_position.dart';
@@ -13,6 +14,7 @@ import 'package:memogenerator/presentation/create_meme/model/meme_text_with_offs
 import 'package:memogenerator/presentation/create_meme/model/meme_text_with_selection.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:uuid/uuid.dart';
 import 'package:collection/collection.dart';
 
@@ -33,6 +35,10 @@ class CreateMemeBloc {
 
   // memePathSubject сохранеие и хранеие пути нашего файла
   final memePathSubject = BehaviorSubject<String?>.seeded(null);
+
+  // screenshot
+  final screenshotControllerSubject =
+      BehaviorSubject<ScreenshotController>.seeded(ScreenshotController());
 
   StreamSubscription<MemeTextOffset?>? newMemeTextOffsetSubscription;
   StreamSubscription<bool>? saveMemeSubscription;
@@ -212,6 +218,10 @@ class CreateMemeBloc {
   Stream<MemeText?> observeSelectedMemeText() =>
       selectedMemeTextSubject.distinct();
 
+  // метод возвращающий observeScreenshotController
+  Stream<ScreenshotController> observeScreenshotController() =>
+      screenshotControllerSubject.distinct();
+
   // Stream возвращающий MemeTextWithSelection
   Stream<List<MemeTextsWithSelection>> observeMemeTextsWithSelection() {
     return Rx.combineLatest2<List<MemeText>, MemeText?,
@@ -235,6 +245,7 @@ class CreateMemeBloc {
     memeTextOffsetsSubject.close();
     newMemeTextOffsetSubject.close();
     memePathSubject.close();
+    screenshotControllerSubject.close();
 
     newMemeTextOffsetSubscription?.cancel();
     saveMemeSubscription?.cancel();

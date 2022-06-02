@@ -12,6 +12,7 @@ import 'package:memogenerator/resources/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:screenshot/screenshot.dart';
 
 class CreateMemePage extends StatefulWidget {
   final String? id;
@@ -283,39 +284,50 @@ class MemeCanvasWidget extends StatelessWidget {
           // при нажатии на свободное поле, сбрасывается выделенеие текста в поле ввода
           // с помощью bloc.deselectMemeText()
           onTap: () => bloc.deselectMemeText(),
-          child: Stack(
-            children: [
-              StreamBuilder<String?>(
-                  stream: bloc.observeMemePath(),
-                  builder: (context, snapshot) {
-                    final path = snapshot.hasData ? snapshot.data : null;
-                    if (path == null) {
-                      return Container(
-                        color: Colors.white,
-                      );
-                    }
-                    return Image.file(File(path));
-                  }),
-              StreamBuilder<List<MemeTextsWithOffset>>(
-                initialData: const <MemeTextsWithOffset>[],
-                stream: bloc.observeMemeTextWithOffsets(),
-                builder: (context, snapshot) {
-                  final memeTextWithOffsets = snapshot.hasData
-                      ? snapshot.data!
-                      : const <MemeTextsWithOffset>[];
-                  return LayoutBuilder(builder: (context, constraints) {
-                    return Stack(
-                      children: memeTextWithOffsets.map((memeTextWithOffsets) {
-                        return DraggableMemeText(
-                          memeTextWithOffset: memeTextWithOffsets,
-                          parentConstraints: constraints,
-                        );
-                      }).toList(),
-                    );
-                  });
-                },
-              ),
-            ],
+          child: StreamBuilder<ScreenshotController>(
+            stream: bloc.observeScreenshotController(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const SizedBox.shrink();
+              }
+              return Screenshot(
+                controller: snapshot.requireData,
+                child: Stack(
+                  children: [
+                    StreamBuilder<String?>(
+                        stream: bloc.observeMemePath(),
+                        builder: (context, snapshot) {
+                          final path = snapshot.hasData ? snapshot.data : null;
+                          if (path == null) {
+                            return Container(
+                              color: Colors.white,
+                            );
+                          }
+                          return Image.file(File(path));
+                        }),
+                    StreamBuilder<List<MemeTextsWithOffset>>(
+                      initialData: const <MemeTextsWithOffset>[],
+                      stream: bloc.observeMemeTextWithOffsets(),
+                      builder: (context, snapshot) {
+                        final memeTextWithOffsets = snapshot.hasData
+                            ? snapshot.data!
+                            : const <MemeTextsWithOffset>[];
+                        return LayoutBuilder(builder: (context, constraints) {
+                          return Stack(
+                            children: memeTextWithOffsets.map((memeTextWithOffsets) {
+                              return DraggableMemeText(
+                                memeTextWithOffset: memeTextWithOffsets,
+                                parentConstraints: constraints,
+                              );
+                            }).toList(),
+                          );
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }
           ),
         ),
       ),
