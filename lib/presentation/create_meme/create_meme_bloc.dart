@@ -30,6 +30,7 @@ class CreateMemeBloc {
   // создание асихронного метода changeMemeTextOffset
   final newMemeTextOffsetSubject =
       BehaviorSubject<MemeTextOffset?>.seeded(null);
+
   // memePathSubject сохранеие и хранеие пути нашего файла
   final memePathSubject = BehaviorSubject<String?>.seeded(null);
 
@@ -72,7 +73,18 @@ class CreateMemeBloc {
         }).toList();
         memeTextSubject.add(memeTexts);
         memeTextOffsetsSubject.add(memeTextOffset);
-        memePathSubject.add(meme.memePath);
+        if (meme.memePath != null) {
+          // абсолютный путь
+          getApplicationDocumentsDirectory().then((docsDirectory) {
+            // полный путь
+            final onlyImageName =
+                meme.memePath!.split(Platform.pathSeparator).last;
+            // получение полного пути
+            final fullImagePath =
+                "${docsDirectory.absolute.path}${Platform.pathSeparator}${SaveMemeInteractor.memesPathName}${Platform.pathSeparator}$onlyImageName";
+            memePathSubject.add(fullImagePath);
+          });
+        }
       },
       onError: (error, stackTrace) =>
           print("Error in existenMemeSubscription: $error, $stackTrace"),

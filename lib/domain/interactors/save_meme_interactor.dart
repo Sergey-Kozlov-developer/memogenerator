@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:collection/collection.dart';
 
 class SaveMemeInteractor {
+  static const memesPathName = "memes";
   static SaveMemeInteractor? _instance;
 
   factory SaveMemeInteractor.getInstance() =>
@@ -24,22 +25,23 @@ class SaveMemeInteractor {
       final meme = Meme(id: id, texts: textWithPositions);
       return await MemesRepository.getInstance().addToMemes(meme);
     }
-    final newImagePath = await createNewFile(imagePath);
+    await createNewFile(imagePath);
 
     final meme = Meme(
       id: id,
       texts: textWithPositions,
-      memePath: newImagePath,
+      memePath: imagePath,
     );
     return await MemesRepository.getInstance().addToMemes(meme);
   }
 
   // возвращение корректного пути файла
-  Future<String> createNewFile(final String imagePath) async {
+  Future<void> createNewFile(final String imagePath) async {
     // docsPath получение доступа где хранятся картинки
     final docsPath = await getApplicationDocumentsDirectory();
     // папка с мемами создаем ее
-    final memePath = "${docsPath.absolute.path}${Platform.pathSeparator}memes";
+    final memePath =
+        "${docsPath.absolute.path}${Platform.pathSeparator}$memesPathName";
     final memesDirectory = Directory(memePath);
     await memesDirectory.create(recursive: true);
 
@@ -61,14 +63,14 @@ class SaveMemeInteractor {
     if (oldFileWithTheSameName == null) {
       // скопировали в новую папку
       await tempFile.copy(newImagePath);
-      return newImagePath;
+      return;
     }
     // запрашиваем размер файла
     final oldFileLength = await (oldFileWithTheSameName as File).length();
     // сколько занимает места файл, который хотим скопировать
     final newFileLength = await tempFile.length();
     if (oldFileLength == newFileLength) {
-      return newImagePath;
+      return;
     }
     //последняя точка до расширения файла
     return _createFileForSameNameButDifferentLength(
@@ -79,8 +81,8 @@ class SaveMemeInteractor {
     );
   }
 
-  Future<String> _createFileForSameNameButDifferentLength({
-      required final String imageName,
+  Future<void> _createFileForSameNameButDifferentLength(
+      {required final String imageName,
       required final File tempFile,
       required final String newImagePath,
       required final String memePath}) async {
@@ -89,7 +91,7 @@ class SaveMemeInteractor {
     if (indexOfLastDot == -1) {
       // скопировали в новую папку
       await tempFile.copy(newImagePath);
-      return newImagePath;
+      return;
     }
     final extension = imageName.substring(indexOfLastDot);
     final imageNameWithoutExtension = imageName.substring(0, indexOfLastDot);
@@ -99,7 +101,7 @@ class SaveMemeInteractor {
           "$memePath${Platform.pathSeparator}${imageNameWithoutExtension}_1$extension";
       // скопировали в новую папку
       await tempFile.copy(correctedNewImagePath);
-      return correctedNewImagePath;
+      return;
     }
     final suffixNumberString =
         imageNameWithoutExtension.substring(indexOfLastUnderscore + 1);
@@ -108,14 +110,13 @@ class SaveMemeInteractor {
       final correctedNewImagePath =
           "$memePath${Platform.pathSeparator}${imageNameWithoutExtension}_1$extension";
       await tempFile.copy(correctedNewImagePath);
-      return correctedNewImagePath;
+      return;
     } else {
       final imageNameWithoutSuffix =
           imageNameWithoutExtension.substring(0, indexOfLastUnderscore);
       final correctedNewImagePath =
           "$memePath${Platform.pathSeparator}${imageNameWithoutSuffix}_${suffixNumber + 1}$extension";
       await tempFile.copy(correctedNewImagePath);
-      return correctedNewImagePath;
     }
   }
 
