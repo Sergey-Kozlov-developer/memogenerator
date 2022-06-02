@@ -24,6 +24,18 @@ class SaveMemeInteractor {
       final meme = Meme(id: id, texts: textWithPositions);
       return await MemesRepository.getInstance().addToMemes(meme);
     }
+    final newImagePath = await createNewFile(imagePath);
+
+    final meme = Meme(
+      id: id,
+      texts: textWithPositions,
+      memePath: newImagePath,
+    );
+    return await MemesRepository.getInstance().addToMemes(meme);
+  }
+
+  // возвращение корректного пути файла
+  Future<String> createNewFile(final String imagePath) async {
     // docsPath получение доступа где хранятся картинки
     final docsPath = await getApplicationDocumentsDirectory();
     // папка с мемами создаем ее
@@ -49,23 +61,62 @@ class SaveMemeInteractor {
     if (oldFileWithTheSameName == null) {
       // скопировали в новую папку
       await tempFile.copy(newImagePath);
-    } else {
-      // запрашиваем размер файла
-      final oldFileLength = await (oldFileWithTheSameName as File).length();
-      // сколько занимает места файл, который хотим скопировать
-      final newFileLength = await tempFile.length();
-      if (oldFileLength != newFileLength) {
-        // избавляемся от расширения файла
-
-      }
+      return newImagePath;
     }
-
-    final meme = Meme(
-      id: id,
-      texts: textWithPositions,
-      memePath: newImagePath,
+    // запрашиваем размер файла
+    final oldFileLength = await (oldFileWithTheSameName as File).length();
+    // сколько занимает места файл, который хотим скопировать
+    final newFileLength = await tempFile.length();
+    if (oldFileLength == newFileLength) {
+      return newImagePath;
+    }
+    //последняя точка до расширения файла
+    return _createFileForSameNameButDifferentLength(
+      imageName: imageName,
+      tempFile: tempFile,
+      newImagePath: newImagePath,
+      memePath: memePath,
     );
-    return await MemesRepository.getInstance().addToMemes(meme);
+  }
+
+  Future<String> _createFileForSameNameButDifferentLength({
+      required final String imageName,
+      required final File tempFile,
+      required final String newImagePath,
+      required final String memePath}) async {
+    final indexOfLastDot = imageName.lastIndexOf(".");
+    // избавляемся от расширения файла
+    if (indexOfLastDot == -1) {
+      // скопировали в новую папку
+      await tempFile.copy(newImagePath);
+      return newImagePath;
+    }
+    final extension = imageName.substring(indexOfLastDot);
+    final imageNameWithoutExtension = imageName.substring(0, indexOfLastDot);
+    final indexOfLastUnderscore = imageNameWithoutExtension.lastIndexOf("_");
+    if (indexOfLastUnderscore == -1) {
+      final correctedNewImagePath =
+          "$memePath${Platform.pathSeparator}${imageNameWithoutExtension}_1$extension";
+      // скопировали в новую папку
+      await tempFile.copy(correctedNewImagePath);
+      return correctedNewImagePath;
+    }
+    final suffixNumberString =
+        imageNameWithoutExtension.substring(indexOfLastUnderscore + 1);
+    final suffixNumber = int.tryParse(suffixNumberString);
+    if (suffixNumber == null) {
+      final correctedNewImagePath =
+          "$memePath${Platform.pathSeparator}${imageNameWithoutExtension}_1$extension";
+      await tempFile.copy(correctedNewImagePath);
+      return correctedNewImagePath;
+    } else {
+      final imageNameWithoutSuffix =
+          imageNameWithoutExtension.substring(0, indexOfLastUnderscore);
+      final correctedNewImagePath =
+          "$memePath${Platform.pathSeparator}${imageNameWithoutSuffix}_${suffixNumber + 1}$extension";
+      await tempFile.copy(correctedNewImagePath);
+      return correctedNewImagePath;
+    }
   }
 
   String _getFileNameByPath(String imagePath) =>
