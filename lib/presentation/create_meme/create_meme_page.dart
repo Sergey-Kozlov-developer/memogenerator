@@ -53,6 +53,16 @@ class _CreateMemePageState extends State<CreateMemePage> {
           bottom: EditTextBar(),
           actions: [
             GestureDetector(
+              onTap: () => bloc.shareMeme(),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Icon(
+                  Icons.share,
+                  color: AppColors.darkGrey,
+                ),
+              ),
+            ),
+            GestureDetector(
               onTap: () => bloc.saveMeme(),
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
@@ -61,7 +71,7 @@ class _CreateMemePageState extends State<CreateMemePage> {
                   color: AppColors.darkGrey,
                 ),
               ),
-            )
+            ),
           ],
         ),
         backgroundColor: Colors.white,

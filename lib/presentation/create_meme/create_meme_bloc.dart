@@ -8,6 +8,7 @@ import 'package:memogenerator/data/models/position.dart';
 import 'package:memogenerator/data/models/text_with_position.dart';
 import 'package:memogenerator/data/repositories/memes_repository.dart';
 import 'package:memogenerator/domain/interactors/save_meme_interactor.dart';
+import 'package:memogenerator/domain/interactors/screensot_interactor.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_offset.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_with_offset.dart';
@@ -43,6 +44,7 @@ class CreateMemeBloc {
   StreamSubscription<MemeTextOffset?>? newMemeTextOffsetSubscription;
   StreamSubscription<bool>? saveMemeSubscription;
   StreamSubscription<Meme?>? existenMemeSubscription;
+  StreamSubscription<void>? shareMemeSubscription;
 
   // конструктор слушатель
   // добавляем debounceTime для сохранения положения после того как мы
@@ -95,6 +97,19 @@ class CreateMemeBloc {
       onError: (error, stackTrace) =>
           print("Error in existenMemeSubscription: $error, $stackTrace"),
     );
+  }
+
+  void shareMeme() {
+    // получаем список с байтами
+    shareMemeSubscription?.cancel();
+    shareMemeSubscription = ScreenshotInteractor.getInstance()
+        .shareScreenshot(screenshotControllerSubject.value)
+        .asStream()
+        .listen(
+          (event) {},
+          onError: (error, stackTrace) =>
+              print("Error in shareMemeSubscription: $error, $stackTrace"),
+        );
   }
 
   // сохранеие текста позиции в shared_pref
@@ -250,5 +265,6 @@ class CreateMemeBloc {
     newMemeTextOffsetSubscription?.cancel();
     saveMemeSubscription?.cancel();
     existenMemeSubscription?.cancel();
+    shareMemeSubscription?.cancel();
   }
 }
