@@ -444,6 +444,8 @@ class _DraggableMemeTextState extends State<DraggableMemeText> {
                 selected: selected,
                 parentConstraints: widget.parentConstraints,
                 text: widget.memeTextWithOffset.text,
+                fontSize: 24,
+                color: Colors.black,
               );
             }),
       ),

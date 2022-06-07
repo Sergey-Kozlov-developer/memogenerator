@@ -17,13 +17,14 @@ class FontSettingBottomSheet extends StatefulWidget {
 
 class _FontSettingBottomSheetState extends State<FontSettingBottomSheet> {
   double fontSize = 16;
-
+  Color color = Colors.black;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 8),
           Center(
@@ -42,18 +43,93 @@ class _FontSettingBottomSheetState extends State<FontSettingBottomSheet> {
             selected: true,
             parentConstraints: BoxConstraints.expand(),
             text: widget.memeText.text,
+            fontSize: fontSize,
+            color: color,
           ),
           const SizedBox(height: 46),
-          FontSizeSlider(),
+          FontSizeSlider(
+            changeFontSize: (value) {
+              setState(() => fontSize = value);
+            },
+          ),
+          const SizedBox(height: 16),
+          ColorSelection(
+            changeColor: (color) {
+              setState(
+                () => this.color = color,
+              );
+            },
+          ),
+          const SizedBox(height: 46),
         ],
       ),
     );
   }
 }
 
+class ColorSelection extends StatelessWidget {
+  final ValueChanged<Color> changeColor;
+
+  const ColorSelection({
+    Key? key,
+    required this.changeColor,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        const SizedBox(width: 16),
+        Text(
+          "Color:",
+          style: TextStyle(
+            fontSize: 20,
+            color: AppColors.darkGrey,
+          ),
+        ),
+        const SizedBox(width: 16),
+        ColorSelectionBox(changeColor: changeColor, color: Colors.white),
+        const SizedBox(width: 16),
+        ColorSelectionBox(changeColor: changeColor, color: Colors.black),
+        const SizedBox(width: 16),
+      ],
+    );
+  }
+}
+
+class ColorSelectionBox extends StatelessWidget {
+  final ValueChanged<Color> changeColor;
+  final Color color;
+
+  const ColorSelectionBox({
+    Key? key,
+    required this.changeColor,
+    required this.color,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => changeColor(color),
+      child: Container(
+        height: 32,
+        width: 32,
+        decoration: BoxDecoration(
+          color: color,
+          border: Border.all(color: Colors.black, width: 1),
+        ),
+      ),
+    );
+  }
+}
+
 class FontSizeSlider extends StatefulWidget {
+  final ValueChanged<double> changeFontSize;
+
   const FontSizeSlider({
     Key? key,
+    required this.changeFontSize,
   }) : super(key: key);
 
   @override
@@ -71,7 +147,7 @@ class _FontSizeSliderState extends State<FontSizeSlider> {
         Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: Text(
-            "Size",
+            "Size:",
             style: TextStyle(
               fontSize: 20,
               color: AppColors.darkGrey,
@@ -95,7 +171,10 @@ class _FontSizeSliderState extends State<FontSizeSlider> {
               label: fontSize.round().toString(),
               value: fontSize,
               onChanged: (double value) {
-                setState(() => fontSize = value);
+                setState(() {
+                  fontSize = value;
+                  widget.changeFontSize(value);
+                });
               },
             ),
           ),
