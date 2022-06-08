@@ -68,7 +68,7 @@ class CreateMemeBloc {
           return;
         }
         final memeTexts = meme.texts.map((textWithPosition) {
-          return MemeText(id: textWithPosition.id, text: textWithPosition.text);
+          return MemeText.createFromTextWithPosition(textWithPosition);
         }).toList();
         final memeTextOffset = meme.texts.map((textWithPosition) {
           return MemeTextOffset(
@@ -112,6 +112,25 @@ class CreateMemeBloc {
         );
   }
 
+  void changeFontSettings(
+    final String textId,
+    final Color color,
+    final double fontSize,
+  ) {
+    final copiedList = [...memeTextSubject.value];
+    final index = copiedList.indexWhere((memeText) => memeText.id == id);
+    if (index == -1) {
+      return;
+    }
+    final oldMemeText = copiedList[index];
+    copiedList.removeAt(index);
+    copiedList.insert(
+      index,
+      oldMemeText.copyWithChangedFontSettings(color, fontSize),
+    );
+    memeTextSubject.add(copiedList);
+  }
+
   // сохранеие текста позиции в shared_pref
   void saveMeme() {
     final memeTexts = memeTextSubject.value;
@@ -126,7 +145,12 @@ class CreateMemeBloc {
         left: memeTextPosition?.offset.dx ?? 0,
       );
       return TextWithPosition(
-          id: memeText.id, text: memeText.text, position: position);
+        id: memeText.id,
+        text: memeText.text,
+        position: position,
+        fontSize: memeText.fontSize,
+        color: memeText.color,
+      );
     }).toList();
 
     saveMemeSubscription = SaveMemeInteractor.getInstance()
@@ -191,8 +215,12 @@ class CreateMemeBloc {
     if (index == -1) {
       return;
     }
+    final oldMemeText = copiedList[index];
     copiedList.removeAt(index);
-    copiedList.insert(index, MemeText(id: id, text: text));
+    copiedList.insert(
+      index,
+      oldMemeText.copyWithChangedText(text),
+    );
     memeTextSubject.add(copiedList);
   }
 

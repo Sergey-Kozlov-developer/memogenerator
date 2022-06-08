@@ -10,6 +10,7 @@ import 'package:memogenerator/presentation/create_meme/model/meme_text.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_with_offset.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_with_selection.dart';
 import 'package:memogenerator/presentation/main/main_bloc.dart';
+import 'package:memogenerator/presentation/widgets/app_button.dart';
 import 'package:memogenerator/resources/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
@@ -215,7 +216,11 @@ class BottomList extends StatelessWidget {
               itemCount: items.length + 1,
               itemBuilder: (BuildContext context, int index) {
                 if (index == 0) {
-                  return const AddNewMemeTextButton();
+                  return AppButton(
+                    onTap: () => bloc.addNewText(),
+                    text: "Добавить текст",
+                    icon: Icons.add,
+                  );
                 }
                 final item = items[index - 1];
                 return BottomMemeText(item: item);
@@ -283,7 +288,10 @@ class BottomMemeText extends StatelessWidget {
                 showModalBottomSheet(
                     context: context,
                     builder: (context) {
-                      return FontSettingBottomSheet(memeText: item.memeText);
+                      return Provider.value(
+                        value: bloc,
+                        child: FontSettingBottomSheet(memeText: item.memeText),
+                      );
                     });
               },
               child: Padding(
@@ -474,42 +482,5 @@ class _DraggableMemeTextState extends State<DraggableMemeText> {
       return widget.parentConstraints.maxWidth - padding * 2 - 10;
     }
     return rawLeft;
-  }
-}
-
-
-
-class AddNewMemeTextButton extends StatelessWidget {
-  const AddNewMemeTextButton({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final bloc = Provider.of<CreateMemeBloc>(context, listen: false);
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => bloc.addNewText(),
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.add, color: AppColors.fuchsia),
-              const SizedBox(width: 8),
-              Text(
-                "Добавить текст".toUpperCase(),
-                style: TextStyle(
-                  color: AppColors.fuchsia,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
