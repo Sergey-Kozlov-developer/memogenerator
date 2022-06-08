@@ -19,8 +19,15 @@ class FontSettingBottomSheet extends StatefulWidget {
 }
 
 class _FontSettingBottomSheetState extends State<FontSettingBottomSheet> {
-  double fontSize = 16;
-  Color color = Colors.black;
+  late double fontSize;
+  late Color color;
+
+  @override
+  void initState() {
+    super.initState();
+    fontSize = widget.memeText.fontSize;
+    color = widget.memeText.color;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +58,7 @@ class _FontSettingBottomSheetState extends State<FontSettingBottomSheet> {
           ),
           const SizedBox(height: 46),
           FontSizeSlider(
+            initialFontSize: fontSize,
             changeFontSize: (value) {
               setState(() => fontSize = value);
             },
@@ -59,7 +67,7 @@ class _FontSettingBottomSheetState extends State<FontSettingBottomSheet> {
           ColorSelection(
             changeColor: (color) {
               setState(
-                    () => this.color = color,
+                () => this.color = color,
               );
             },
           ),
@@ -85,7 +93,10 @@ class Buttons extends StatelessWidget {
   final double fontSize;
 
   const Buttons({
-    Key? key,  required this.textId, required this.color, required this.fontSize,
+    Key? key,
+    required this.textId,
+    required this.color,
+    required this.fontSize,
   }) : super(key: key);
 
   @override
@@ -102,7 +113,7 @@ class Buttons extends StatelessWidget {
         const SizedBox(width: 24),
         AppButton(
           onTap: () {
-            bloc.changeFontSettings( textId, color, fontSize);
+            bloc.changeFontSettings(textId, color, fontSize);
             Navigator.of(context).pop();
           },
           text: "Сохранить",
@@ -172,10 +183,12 @@ class ColorSelectionBox extends StatelessWidget {
 
 class FontSizeSlider extends StatefulWidget {
   final ValueChanged<double> changeFontSize;
+  final double initialFontSize;
 
   const FontSizeSlider({
     Key? key,
     required this.changeFontSize,
+    required this.initialFontSize,
   }) : super(key: key);
 
   @override
@@ -183,7 +196,14 @@ class FontSizeSlider extends StatefulWidget {
 }
 
 class _FontSizeSliderState extends State<FontSizeSlider> {
-  double fontSize = 20;
+  late double fontSize;
+
+
+  @override
+  void initState() {
+    super.initState();
+    fontSize = widget.initialFontSize;
+  }
 
   @override
   Widget build(BuildContext context) {

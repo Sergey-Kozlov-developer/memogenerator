@@ -118,14 +118,12 @@ class CreateMemeBloc {
     final double fontSize,
   ) {
     final copiedList = [...memeTextSubject.value];
-    final index = copiedList.indexWhere((memeText) => memeText.id == id);
-    if (index == -1) {
+    final oldMemeText = copiedList.firstWhereOrNull((memeText) => memeText.id == textId);
+    if (oldMemeText == null) {
       return;
     }
-    final oldMemeText = copiedList[index];
-    copiedList.removeAt(index);
-    copiedList.insert(
-      index,
+    copiedList.remove(oldMemeText);
+    copiedList.add(
       oldMemeText.copyWithChangedFontSettings(color, fontSize),
     );
     memeTextSubject.add(copiedList);
@@ -251,8 +249,7 @@ class CreateMemeBloc {
           return element.id == memeText.id;
         });
         return MemeTextsWithOffset(
-          id: memeText.id,
-          text: memeText.text,
+          memeText: memeText,
           offset: memeTextOffset?.offset,
         );
       }).toList();

@@ -411,7 +411,7 @@ class _DraggableMemeTextState extends State<DraggableMemeText> {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         final bloc = Provider.of<CreateMemeBloc>(context, listen: false);
         bloc.changeMemeTextOffset(
-          widget.memeTextWithOffset.id,
+          widget.memeTextWithOffset.memeText.id,
           Offset(left, top),
         );
       });
@@ -429,15 +429,15 @@ class _DraggableMemeTextState extends State<DraggableMemeText> {
       child: GestureDetector(
         // behavior для изменения перетаскивания
         behavior: HitTestBehavior.opaque,
-        onTap: () => bloc.selectMemeText(widget.memeTextWithOffset.id),
+        onTap: () => bloc.selectMemeText(widget.memeTextWithOffset.memeText.id),
         // для перетаскивание widget переопределяем onPanUpdate
         onPanUpdate: (details) {
-          bloc.selectMemeText(widget.memeTextWithOffset.id);
+          bloc.selectMemeText(widget.memeTextWithOffset.memeText.id);
           setState(() {
             left = calculateLeft(details);
             top = calculateTop(details);
             bloc.changeMemeTextOffset(
-                widget.memeTextWithOffset.id, Offset(left, top));
+                widget.memeTextWithOffset.memeText.id, Offset(left, top));
           });
         },
         // получение инфы о выделенным текстом
@@ -446,14 +446,14 @@ class _DraggableMemeTextState extends State<DraggableMemeText> {
             builder: (context, snapshot) {
               // selected для выделения текста
               final selectItem = snapshot.hasData ? snapshot.data : null;
-              final selected = widget.memeTextWithOffset.id == selectItem?.id;
+              final selected = widget.memeTextWithOffset.memeText.id == selectItem?.id;
               return MemeTextOnCanvas(
                 padding: padding,
                 selected: selected,
                 parentConstraints: widget.parentConstraints,
-                text: widget.memeTextWithOffset.text,
-                fontSize: 24,
-                color: Colors.black,
+                text: widget.memeTextWithOffset.memeText.text,
+                fontSize: widget.memeTextWithOffset.memeText.fontSize,
+                color: widget.memeTextWithOffset.memeText.color,
               );
             }),
       ),
