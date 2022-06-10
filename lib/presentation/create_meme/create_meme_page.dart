@@ -471,7 +471,7 @@ class _DraggableMemeTextState extends State<DraggableMemeText> {
     // сохранение текста, если вышли в другое меню там,
     // где мы начали его добавлять при вводе текста,
     if (widget.memeTextWithOffset.offset == null) {
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
         final bloc = Provider.of<CreateMemeBloc>(context, listen: false);
         bloc.changeMemeTextOffset(
           widget.memeTextWithOffset.memeText.id,
