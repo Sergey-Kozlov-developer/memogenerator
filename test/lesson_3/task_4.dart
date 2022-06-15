@@ -8,7 +8,7 @@ import 'package:memogenerator/data/models/position.dart';
 import 'package:memogenerator/data/models/text_with_position.dart';
 import 'package:memogenerator/presentation/create_meme/create_meme_page.dart';
 import 'package:memogenerator/presentation/create_meme/font_settings_bottom_sheet.dart';
-import 'package:memogenerator/presentation/create_meme/model/meme_text.dart';
+import 'package:memogenerator/presentation/create_meme/models/meme_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
