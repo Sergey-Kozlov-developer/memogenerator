@@ -104,33 +104,6 @@ class _MainPageState extends State<MainPage> {
   }
 
 
-  Future<bool?> showConfirmationExitDualog(BuildContext context) {
-    return showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Точно хотите выйти?"),
-          actionsPadding: EdgeInsets.symmetric(horizontal: 16),
-          content: Text("Мемы сами себя не сделают"),
-          actions: [
-            AppButton(
-              onTap: () {
-                Navigator.of(context).pop(false);
-              },
-              text: "Остаться",
-              color: AppColors.darkGrey,
-            ),
-            AppButton(
-              onTap: () {
-                Navigator.of(context).pop(true);
-              },
-              text: "Выйти",
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   @override
   void dispose() {
