@@ -9,6 +9,7 @@ import 'package:memogenerator/presentation/create_meme/meme_text_on_canvas.dart'
 import 'package:memogenerator/presentation/create_meme/model/meme_text.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_with_offset.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_with_selection.dart';
+import 'package:memogenerator/presentation/create_meme/models/meme_text_with_offset.dart';
 import 'package:memogenerator/presentation/main/main_bloc.dart';
 import 'package:memogenerator/presentation/widgets/app_button.dart';
 import 'package:memogenerator/resources/app_colors.dart';

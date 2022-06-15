@@ -326,3 +326,70 @@ class _FontWeightSliderState extends State<FontWeightSlider> {
     );
   }
 }
+
+class FontWeightSlider extends StatefulWidget {
+  final ValueChanged<FontWeight> changeFontWeight;
+  final FontWeight initialFontWeight;
+
+  const FontWeightSlider({
+    Key? key,
+    required this.changeFontWeight,
+    required this.initialFontWeight,
+  }) : super(key: key);
+
+  @override
+  State<FontWeightSlider> createState() => _FontWeightSliderState();
+}
+
+class _FontWeightSliderState extends State<FontWeightSlider> {
+  late FontWeight fontWeight;
+
+  @override
+  void initState() {
+    super.initState();
+    fontWeight = widget.initialFontWeight;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const SizedBox(width: 16),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            "Font Weight:",
+            style: TextStyle(
+              fontSize: 20,
+              color: AppColors.darkGrey,
+            ),
+          ),
+        ),
+        Expanded(
+          child: SliderTheme(
+            data: SliderThemeData(
+              activeTrackColor: AppColors.fuchsia,
+              inactiveTrackColor: AppColors.fuchsia38,
+              thumbColor: AppColors.fuchsia,
+              inactiveTickMarkColor: AppColors.fuchsia,
+              valueIndicatorColor: AppColors.fuchsia,
+            ),
+            child: Slider(
+              min: FontWeight.w100.index.toDouble(),
+              max: FontWeight.w900.index.toDouble(),
+              divisions: FontWeight.w900.index - FontWeight.w100.index,
+              value: fontWeight.index.toDouble(),
+              onChanged: (double value) {
+                setState(() {
+                  fontWeight = FontWeight.values.firstWhere(
+                      (fontWeight) => fontWeight.index == value.toInt());
+                  widget.changeFontWeight(fontWeight);
+                });
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
