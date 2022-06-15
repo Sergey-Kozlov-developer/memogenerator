@@ -1,6 +1,6 @@
 // информация нетолько о выделенном тексте но и выделен ли он
 import 'package:equatable/equatable.dart';
-import 'package:memogenerator/presentation/create_meme/model/meme_text.dart';
+import 'package:memogenerator/presentation/create_meme/models/meme_text.dart';
 
 class MemeTextsWithSelection extends Equatable {
   final MemeText memeText;
