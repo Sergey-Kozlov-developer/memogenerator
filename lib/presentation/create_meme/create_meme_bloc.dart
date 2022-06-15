@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:memogenerator/data/models/meme.dart';
 import 'package:memogenerator/data/models/position.dart';
 import 'package:memogenerator/data/models/text_with_position.dart';
 import 'package:memogenerator/data/repositories/memes_repository.dart';
 import 'package:memogenerator/domain/interactors/save_meme_interactor.dart';
-import 'package:memogenerator/domain/interactors/screensot_interactor.dart';
+import 'package:memogenerator/domain/interactors/screenshot_interactor.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_offset.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_with_offset.dart';
@@ -58,6 +59,30 @@ class CreateMemeBloc {
     memePathSubject.add(selectedMemePath);
     _subscribeToNewMemTextOffset();
     _subscribeToExistentMeme();
+  }
+
+  Future<bool> isAllSaved() async {
+    // есть ли сохраненный мем
+    final savedMeme = await MemesRepository.getInstance().getMeme(id);
+    if (savedMeme == null) {
+      return false;
+    }
+    final savedMemeTexts = savedMeme.texts.map((textWithPosition) {
+      return MemeText.createFromTextWithPosition(textWithPosition);
+    }).toList();
+    final savedMemeTextOffset = savedMeme.texts.map((textWithPosition) {
+      return MemeTextOffset(
+        id: textWithPosition.id,
+        offset: Offset(
+          textWithPosition.position.left,
+          textWithPosition.position.top,
+        ),
+      );
+    }).toList();
+    return DeepCollectionEquality.unordered()
+            .equals(savedMemeTexts, memeTextSubject.value) &&
+        DeepCollectionEquality.unordered()
+            .equals(savedMemeTextOffset, memeTextOffsetsSubject.value);
   }
 
   void _subscribeToExistentMeme() {
@@ -116,17 +141,26 @@ class CreateMemeBloc {
     final String textId,
     final Color color,
     final double fontSize,
+    final FontWeight fontWeight,
   ) {
     final copiedList = [...memeTextSubject.value];
-    final oldMemeText = copiedList.firstWhereOrNull((memeText) => memeText.id == textId);
+    final oldMemeText =
+        copiedList.firstWhereOrNull((memeText) => memeText.id == textId);
     if (oldMemeText == null) {
       return;
     }
     copiedList.remove(oldMemeText);
     copiedList.add(
-      oldMemeText.copyWithChangedFontSettings(color, fontSize),
+      oldMemeText.copyWithChangedFontSettings(color, fontSize, fontWeight),
     );
     memeTextSubject.add(copiedList);
+  }
+
+  // delete text
+  void deleteMemeText(final String textId) {
+    final updatedMemeTexts = [...memeTextSubject.value];
+    updatedMemeTexts.removeWhere((memeText) => memeText.id == textId);
+    memeTextSubject.add(updatedMemeTexts);
   }
 
   // сохранеие текста позиции в shared_pref
@@ -148,6 +182,7 @@ class CreateMemeBloc {
         position: position,
         fontSize: memeText.fontSize,
         color: memeText.color,
+        fontWeight: memeText.fontWeight,
       );
     }).toList();
 
