@@ -9,7 +9,7 @@ import 'package:memogenerator/data/models/position.dart';
 import 'package:memogenerator/data/models/text_with_position.dart';
 import 'package:memogenerator/data/repositories/memes_repository.dart';
 import 'package:memogenerator/domain/interactors/save_meme_interactor.dart';
-import 'package:memogenerator/domain/interactors/screensot_interactor.dart';
+import 'package:memogenerator/domain/interactors/screenshot_interactor.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_offset.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text.dart';
 import 'package:memogenerator/presentation/create_meme/model/meme_text_with_offset.dart';
