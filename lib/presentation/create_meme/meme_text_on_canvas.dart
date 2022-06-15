@@ -8,6 +8,7 @@ class MemeTextOnCanvas extends StatelessWidget {
   final String text;
   final double fontSize;
   final Color color;
+  final FontWeight fontWeight;
 
   const MemeTextOnCanvas({
     Key? key,
@@ -17,6 +18,7 @@ class MemeTextOnCanvas extends StatelessWidget {
     required this.text,
     required this.fontSize,
     required this.color,
+    required this.fontWeight,
   }) : super(key: key);
 
   @override
@@ -42,6 +44,7 @@ class MemeTextOnCanvas extends StatelessWidget {
         style: TextStyle(
           color: color,
           fontSize: fontSize,
+          fontWeight: fontWeight,
         ),
       ),
     );
