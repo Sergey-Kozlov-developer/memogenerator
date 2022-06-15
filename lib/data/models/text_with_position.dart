@@ -53,13 +53,3 @@ FontWeight? fontWeightFromJson(final int? fontWeightIndex) {
   return FontWeight.values.firstWhere(
           (fontWeight) => fontWeight.index == fontWeightIndex);
 }
-
-int? fontWeightToJson(final FontWeight? fontWeight) {
-  return fontWeight == null ? null : fontWeight.index;
-}
-
-FontWeight? fontWeightFromJson(final int? fontWeightIndex) {
-  if (fontWeightIndex == null) return null;
-  return FontWeight.values.firstWhere(
-          (fontWeight) => fontWeight.index == fontWeightIndex);
-}
