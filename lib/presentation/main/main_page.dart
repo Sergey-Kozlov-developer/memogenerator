@@ -39,41 +39,44 @@ class _MainPageState extends State<MainPage> {
           // нажали вне нашего диалога
           return goBack ?? false;
         },
-        child: Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-            title: Text("Мемогенератор",
-                style: GoogleFonts.seymourOne(fontSize: 24)),
-            backgroundColor: AppColors.lemon,
-            foregroundColor: AppColors.darkGrey,
-          ),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () async {
-              final selectedMemePath = await bloc.selectMeme();
-              if (selectedMemePath == null) {
-                return;
-              }
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => CreateMemePage(
-                    selectedMemePath: selectedMemePath,
+        child: DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            appBar: AppBar(
+              centerTitle: true,
+              title: Text(
+                "Мемогенератор",
+                style: GoogleFonts.seymourOne(fontSize: 24),
+              ),
+              bottom: TabBar(
+                labelColor: AppColors.darkGrey,
+                indicatorColor: AppColors.fuchsia,
+                indicatorWeight: 3,
+                tabs: [
+                  Tab(
+                    text: "Созданные".toUpperCase(),
                   ),
-                ),
-              );
-            },
-            backgroundColor: AppColors.fuchsia,
-            icon: Icon(Icons.add, color: Colors.white),
-            label: Text("Создать"),
-          ),
-          backgroundColor: Colors.white,
-          body: SafeArea(
-            child: MainPageContent(),
+                  Tab(
+                    text: "Шаблоны".toUpperCase(),
+                  ),
+                ],
+              ),
+              backgroundColor: AppColors.lemon,
+              foregroundColor: AppColors.darkGrey,
+            ),
+            floatingActionButton: CreateMemeFab(),
+            backgroundColor: Colors.white,
+            body: TabBarView(
+              children: [
+                SafeArea(child: TemplatesGrid()),
+                SafeArea(child: TemplatesGrid()),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
-
 
   Future<bool?> showConfirmationExitDualog(BuildContext context) {
     return showDialog(
@@ -103,8 +106,6 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-
-
   @override
   void dispose() {
     bloc.dispose();
@@ -112,12 +113,37 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
-class MainPageContent extends StatefulWidget {
+class CreateMemeFab extends StatelessWidget {
+  const CreateMemeFab({
+    Key? key,
+  }) : super(key: key);
+
   @override
-  State<MainPageContent> createState() => _MainPageContentState();
+  Widget build(BuildContext context) {
+    final bloc = Provider.of<MainBloc>(context, listen: false);
+    return FloatingActionButton.extended(
+      onPressed: () async {
+        final selectedMemePath = await bloc.selectMeme();
+        if (selectedMemePath == null) {
+          return;
+        }
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => CreateMemePage(
+              selectedMemePath: selectedMemePath,
+            ),
+          ),
+        );
+      },
+      backgroundColor: AppColors.fuchsia,
+      icon: Icon(Icons.add, color: Colors.white),
+      label: Text("Создать"),
+    );
+  }
 }
 
-class _MainPageContentState extends State<MainPageContent> {
+class CreatedMemesGrid extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     final bloc = Provider.of<MainBloc>(context, listen: false);
@@ -177,6 +203,32 @@ class GridItem extends StatelessWidget {
               )
             : Text(meme.id),
       ),
+    );
+  }
+}
+class TemplatesGrid extends StatelessWidget {
+
+  @override
+  Widget build(BuildContext context) {
+    final bloc = Provider.of<MainBloc>(context, listen: false);
+    return StreamBuilder<MemesWithDocsPath>(
+      stream: bloc.observeMemesWithDocsPath(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const SizedBox.shrink();
+        }
+        final items = snapshot.requireData.memes;
+        final docsPath = snapshot.requireData.docsPath;
+        return GridView.extent(
+          maxCrossAxisExtent: 180,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+          children: items.map((item) {
+            return GridItem(meme: item, docsPath: docsPath);
+          }).toList(),
+        );
+      },
     );
   }
 }
