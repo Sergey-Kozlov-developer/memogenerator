@@ -16,7 +16,7 @@ class MainBloc {
     return Rx.combineLatest2<List<Meme>, Directory, MemesWithDocsPath>(
       MemesRepository.getInstance().observeMemes(), // получает мемы
       getApplicationDocumentsDirectory().asStream(), // получает папку
-          (memes, docsDirectory) =>
+      (memes, docsDirectory) =>
           MemesWithDocsPath(memes, docsDirectory.path), // в одну модель
     );
   }
@@ -25,11 +25,10 @@ class MainBloc {
     return Rx.combineLatest2<List<Template>, Directory, List<TemplateFull>>(
       TemplatesRepository.getInstance().observeTemplates(), // получает шаблон
       getApplicationDocumentsDirectory().asStream(), // получает папку
-          (templates, docsDirectory) {
+      (templates, docsDirectory) {
         return templates.map((template) {
-          final fullImagePath = "${docsDirectory.absolute.path}${Platform
-              .pathSeparator}${SaveTemplateInteractor
-              .templatesPathName}${Platform.pathSeparator}${template.imageUrl}";
+          final fullImagePath =
+              "${docsDirectory.absolute.path}${Platform.pathSeparator}${SaveTemplateInteractor.templatesPathName}${Platform.pathSeparator}${template.imageUrl}";
           return TemplateFull(
             id: template.id,
             fullImagePath: fullImagePath,
@@ -41,7 +40,12 @@ class MainBloc {
 
   Future<String?> selectMeme() async {
     final xfile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    return xfile?.path;
+    final imagePath = xfile?.path;
+    if (imagePath != null) {
+      await SaveTemplateInteractor.getInstance()
+          .saveTemplate(imagePath: imagePath);
+    }
+    return imagePath;
   }
 
   void dispose() {}

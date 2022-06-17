@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:memogenerator/data/models/meme.dart';
 import 'package:memogenerator/presentation/main/main_bloc.dart';
 import 'package:memogenerator/presentation/create_meme/create_meme_page.dart';
 import 'package:memogenerator/presentation/main/memes_with_docs_path.dart';
+import 'package:memogenerator/presentation/main/models/template_full.dart';
 import 'package:memogenerator/presentation/widgets/app_button.dart';
 import 'package:memogenerator/resources/app_colors.dart';
 import 'package:provider/provider.dart';
@@ -68,7 +68,7 @@ class _MainPageState extends State<MainPage> {
             backgroundColor: Colors.white,
             body: TabBarView(
               children: [
-                SafeArea(child: TemplatesGrid()),
+                SafeArea(child: CreatedMemesGrid()),
                 SafeArea(child: TemplatesGrid()),
               ],
             ),
@@ -143,7 +143,6 @@ class CreateMemeFab extends StatelessWidget {
 }
 
 class CreatedMemesGrid extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     final bloc = Provider.of<MainBloc>(context, listen: false);
@@ -161,7 +160,7 @@ class CreatedMemesGrid extends StatelessWidget {
           crossAxisSpacing: 8,
           padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
           children: items.map((item) {
-            return GridItem(meme: item, docsPath: docsPath);
+            return MemeGridItem(meme: item, docsPath: docsPath);
           }).toList(),
         );
       },
@@ -169,8 +168,8 @@ class CreatedMemesGrid extends StatelessWidget {
   }
 }
 
-class GridItem extends StatelessWidget {
-  const GridItem({
+class MemeGridItem extends StatelessWidget {
+  const MemeGridItem({
     Key? key,
     required this.meme,
     required this.docsPath,
@@ -206,29 +205,60 @@ class GridItem extends StatelessWidget {
     );
   }
 }
-class TemplatesGrid extends StatelessWidget {
 
+class TemplatesGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bloc = Provider.of<MainBloc>(context, listen: false);
-    return StreamBuilder<MemesWithDocsPath>(
-      stream: bloc.observeMemesWithDocsPath(),
+    return StreamBuilder<List<TemplateFull>>(
+      stream: bloc.observeTemplates(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const SizedBox.shrink();
         }
-        final items = snapshot.requireData.memes;
-        final docsPath = snapshot.requireData.docsPath;
+        final templates = snapshot.requireData;
         return GridView.extent(
           maxCrossAxisExtent: 180,
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
           padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-          children: items.map((item) {
-            return GridItem(meme: item, docsPath: docsPath);
+          children: templates.map((template) {
+            return TemplateGridItem(template: template);
           }).toList(),
         );
       },
+    );
+  }
+}
+
+class TemplateGridItem extends StatelessWidget {
+  const TemplateGridItem({
+    Key? key,
+    required this.template,
+  }) : super(key: key);
+
+  final TemplateFull template;
+
+  @override
+  Widget build(BuildContext context) {
+    final imageFile = File(template.fullImagePath);
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => CreateMemePage(
+              selectedMemePath: template.fullImagePath,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        alignment: Alignment.centerLeft,
+        decoration: BoxDecoration(
+            border: Border.all(color: AppColors.darkGrey, width: 1)),
+        child:
+            imageFile.existsSync() ? Image.file(imageFile) : Text(template.id),
+      ),
     );
   }
 }
