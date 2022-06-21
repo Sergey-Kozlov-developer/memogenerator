@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:memogenerator/data/models/meme.dart';
+import 'package:memogenerator/presentation/easter_egg/easter_egg_page.dart';
 import 'package:memogenerator/presentation/main/main_bloc.dart';
 import 'package:memogenerator/presentation/create_meme/create_meme_page.dart';
 import 'package:memogenerator/presentation/main/memes_with_docs_path.dart';
@@ -44,9 +45,18 @@ class _MainPageState extends State<MainPage> {
           child: Scaffold(
             appBar: AppBar(
               centerTitle: true,
-              title: Text(
-                "Мемогенератор",
-                style: GoogleFonts.seymourOne(fontSize: 24),
+              title: GestureDetector(
+                onLongPress: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => EasterEggPage(),
+                    ),
+                  );
+                },
+                child: Text(
+                  "Мемогенератор",
+                  style: GoogleFonts.seymourOne(fontSize: 24),
+                ),
               ),
               bottom: TabBar(
                 labelColor: AppColors.darkGrey,

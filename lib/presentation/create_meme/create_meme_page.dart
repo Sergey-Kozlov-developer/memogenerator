@@ -177,17 +177,17 @@ class _AnimatedIconButtonState extends State<AnimatedIconButton> {
 
   @override
   Widget build(BuildContext context) {
-    final bloc = Provider.of<CreateMemeBloc>(context, listen: false);
     return GestureDetector(
       onTap: () {
         setState(() => scale = 1.5);
-        widget.onTap;
+        widget.onTap();
       },
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16),
         child: AnimatedScale(
           scale: scale,
-          duration: Duration(milliseconds: 200),
+          curve: Curves.bounceInOut,
+          duration: Duration(milliseconds: 300),
           child: Icon(
             widget.icon,
             color: AppColors.darkGrey,
