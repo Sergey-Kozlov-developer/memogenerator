@@ -201,16 +201,39 @@ class MemeGridItem extends StatelessWidget {
           ),
         );
       },
-      child: Container(
-        alignment: Alignment.centerLeft,
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.darkGrey, width: 1),
-        ),
-        child: imageFile.existsSync()
-            ? Image.file(
-                File("$docsPath${Platform.pathSeparator}${meme.id}.png"),
-              )
-            : Text(meme.id),
+      child: Stack(
+        children: [
+          Container(
+            alignment: Alignment.centerLeft,
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.darkGrey, width: 1),
+            ),
+            child: imageFile.existsSync()
+                ? Image.file(
+                    File("$docsPath${Platform.pathSeparator}${meme.id}.png"),
+                  )
+                : Text(meme.id),
+          ),
+          Positioned(
+            bottom: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () => print('AAA'),
+              child: Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.darkGrey38,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.delete_outline,
+                  size: 24,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
