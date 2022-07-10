@@ -48,5 +48,17 @@ class MainBloc {
     return imagePath;
   }
 
+  // метода удаления мема с главного экрана
+  void deleteMeme(final String memeId) {
+    MemesRepository.getInstance().removeFromMemes(memeId);
+  }
+
+  void deleteTemplate(final String templateId) {
+    TemplatesRepository.getInstance().removeFromTemplates(templateId);
+  }
+
   void dispose() {}
+
+
+
 }
