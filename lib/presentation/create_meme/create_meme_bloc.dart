@@ -64,7 +64,7 @@ class CreateMemeBloc {
 
   Future<bool> isAllSaved() async {
     // есть ли сохраненный мем
-    final savedMeme = await MemesRepository.getInstance().getMeme(id);
+    final savedMeme = await MemesRepository.getInstance().getItemById(id);
     if (savedMeme == null) {
       return false;
     }
@@ -88,7 +88,7 @@ class CreateMemeBloc {
 
   void _subscribeToExistentMeme() {
     existenMemeSubscription =
-        MemesRepository.getInstance().getMeme(this.id).asStream().listen(
+        MemesRepository.getInstance().getItemById(this.id).asStream().listen(
       (meme) {
         if (meme == null) {
           return;

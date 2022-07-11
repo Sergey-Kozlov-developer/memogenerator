@@ -27,7 +27,7 @@ class SaveMemeInteractor {
     // imagePath сохранение картинки
     if (imagePath == null) {
       final meme = Meme(id: id, texts: textWithPositions);
-      return await MemesRepository.getInstance().addToMemes(meme);
+      return await MemesRepository.getInstance().addItemOrReplaceById(meme);
     }
     await ScreenshotInteractor.getInstance()
         .saveThumbnail(id, screenshotController);
@@ -42,6 +42,6 @@ class SaveMemeInteractor {
       texts: textWithPositions,
       memePath: newImagePath,
     );
-    return MemesRepository.getInstance().addToMemes(meme);
+    return MemesRepository.getInstance().addItemOrReplaceById(meme);
   }
 }

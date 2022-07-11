@@ -16,7 +16,7 @@ class MainBloc {
 
   Stream<List<MemeThumbnail>> observeMemes() {
     return Rx.combineLatest2<List<Meme>, Directory, List<MemeThumbnail>>(
-      MemesRepository.getInstance().observeMemes(), // получает мемы
+      MemesRepository.getInstance().observeItems(), // получает мемы
       getApplicationDocumentsDirectory().asStream(), // получает папку
       (memes, docsDirectory) {
         return memes.map((meme) {
@@ -66,7 +66,7 @@ class MainBloc {
 
   // метода удаления мема с главного экрана
   void deleteMeme(final String memeId) {
-    MemesRepository.getInstance().removeFromMemes(memeId);
+    MemesRepository.getInstance().removeFromItemsById(memeId);
   }
 
   void deleteTemplate(final String templateId) {
