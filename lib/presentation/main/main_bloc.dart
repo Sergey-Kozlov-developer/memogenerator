@@ -7,17 +7,24 @@ import 'package:memogenerator/data/repositories/memes_repository.dart';
 import 'package:memogenerator/data/repositories/templates_repository.dart';
 import 'package:memogenerator/domain/interactors/save_template_interactor.dart';
 import 'package:memogenerator/presentation/main/memes_with_docs_path.dart';
+import 'package:memogenerator/presentation/main/models/meme_thumbnail.dart';
 import 'package:memogenerator/presentation/main/models/template_full.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MainBloc {
-  Stream<MemesWithDocsPath> observeMemesWithDocsPath() {
-    return Rx.combineLatest2<List<Meme>, Directory, MemesWithDocsPath>(
+
+  Stream<List<MemeThumbnail>> observeMemes() {
+    return Rx.combineLatest2<List<Meme>, Directory, List<MemeThumbnail>>(
       MemesRepository.getInstance().observeMemes(), // получает мемы
       getApplicationDocumentsDirectory().asStream(), // получает папку
-      (memes, docsDirectory) =>
-          MemesWithDocsPath(memes, docsDirectory.path), // в одну модель
+      (memes, docsDirectory) {
+        return memes.map((meme) {
+          final fullImageUrl =
+              "${docsDirectory.absolute.path}${Platform.pathSeparator}${meme.id}.png";
+          return MemeThumbnail(memeId: meme.id, fullImageUrl: fullImageUrl);
+        }).toList();
+      }, // в одну модель
     );
   }
 
@@ -67,7 +74,4 @@ class MainBloc {
   }
 
   void dispose() {}
-
-
-
 }
