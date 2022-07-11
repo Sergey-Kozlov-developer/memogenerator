@@ -30,7 +30,7 @@ class MainBloc {
 
   Stream<List<TemplateFull>> observeTemplates() {
     return Rx.combineLatest2<List<Template>, Directory, List<TemplateFull>>(
-      TemplatesRepository.getInstance().observeTemplates(), // получает шаблон
+      TemplatesRepository.getInstance().observeItems(), // получает шаблон
       getApplicationDocumentsDirectory().asStream(), // получает папку
       (templates, docsDirectory) {
         return templates.map((template) {
@@ -70,7 +70,7 @@ class MainBloc {
   }
 
   void deleteTemplate(final String templateId) {
-    TemplatesRepository.getInstance().removeFromTemplates(templateId);
+    TemplatesRepository.getInstance().removeFromItemsById(templateId);
   }
 
   void dispose() {}

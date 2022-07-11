@@ -1,12 +1,13 @@
 import 'dart:convert';
 
 import 'package:memogenerator/data/models/template.dart';
+import 'package:memogenerator/data/repositories/list_with_ids_reactive_repository.dart';
 import 'package:memogenerator/data/shared_preference_data.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:collection/collection.dart';
 
-class TemplatesRepository {
+class TemplatesRepository extends ListWithIdsReactiveRepository<Template> {
   final updater = PublishSubject<Null>();
   final SharedPreferenceData spData;
 
@@ -17,73 +18,19 @@ class TemplatesRepository {
 
   TemplatesRepository._internal(this.spData);
 
-  // метод добавления в главный экран
-  Future<bool> addToTemplates(final Template newTemplate) async {
-    // получаем сырой список templates, листы со стрингами
-    final templates = await getTemplates();
-    // получение доступа к id существующего мема и сравниваем с новым
-    final templateIndex = templates.indexWhere((template) => template.id == newTemplate.id);
-    // если нет мема, то добавляем его
-    if (templateIndex == -1) {
-      // возвращаем старые мемы и новые
-      templates.add(newTemplate);
-    } else {
-      templates.removeAt(templateIndex);
-      templates.insert(templateIndex, newTemplate);
-    }
+  @override
+  Template convertFromString(String rawItem) => Template.fromJson(json.decode(rawItem));
 
-    // возвращаем все мемы
-    return _setTemplates(templates);
-  }
+  @override
+  String convertToString(Template item) => json.encode(item.toJson());
 
-  // удаление по id
-  Future<bool> removeFromTemplates(final String id) async {
-    // получаем мем по id, сырой список превратили в стринг
-    final templates = await getTemplates();
-    // удаляем новый мем
-    templates.removeWhere((template) => template.id == id);
-    // сохраняем
-    return _setTemplates(templates);
-  }
+  @override
+  dynamic getId(item) => item.id;
 
-  // отображение всего списка избранного на главном экране
-  // при изменении данных запашивать данные у shared_Preferences
-  // подписка на мемы
-  Stream<List<Template>> observeTemplates() async* {
-    // возвращаем значение в Stream подождав, от сюда _getTemplates()
-    yield await getTemplates();
-    await for (final _ in updater) {
-      // приходит инфа в updater
-      // отдаем текущее состояние хранилища
-      yield await getTemplates();
-    }
-  }
+  @override
+  Future<List<String>> getRawData() => spData.getTemplates();
 
-  Future<List<Template>> getTemplates() async {
-    // получаем сырой список мемов, листы со стрингами
-    final rawTemplates = await spData.getTemplates();
-    // получаем мем по id, сырой список превратили в стринг
-    return rawTemplates
-        .map((rawTemplate) => Template.fromJson(json.decode(rawTemplate)))
-        .toList();
-  }
+  @override
+  Future<bool> saveRawData(List<String> items) => spData.setTemplates(items);
 
-  // сохранение списка избранного в локальном хранилище
-  // и его отображение на экране
-  Future<Template?> getTemplate(final String id) async {
-    // получаем template
-    final templates = await getTemplates();
-    return templates.firstWhereOrNull((template) => template.id == id);
-  }
-
-  Future<bool> _setTemplates(final List<Template> templates) async {
-    final rawTemplates = templates.map((template) => json.encode(template.toJson())).toList();
-    // сохраняем
-    return _setRawTemplates(rawTemplates);
-  }
-
-  Future<bool> _setRawTemplates(final List<String> rawTemplates) {
-    updater.add(null);
-    return spData.setTemplates(rawTemplates);
-  }
 }
